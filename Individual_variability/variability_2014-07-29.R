@@ -1,5 +1,5 @@
 
-File = "C:/Users/James.Thorson/Desktop/UW Hideaway/Collaborations/2013 -- Random effect review/Code/Individual variability/"
+File = "C:/Users/James.Thorson/Desktop/Project_git/mixed-effects/Individual_variability/"
 setwd(File)
 
 library(abind)

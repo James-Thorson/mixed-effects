@@ -11,7 +11,7 @@
 
 #source("http://www.math.ntnu.no/inla/givemeINLA.R")
 #inla.upgrade()
-setwd("C:/Users/James.Thorson/Desktop/UW Hideaway/Collaborations/2013 -- Random effect review/Code/Spatial model")
+setwd("C:/Users/James.Thorson/Desktop/Project_git/mixed-effects/Spatial_model")
 
 require(INLA) # Download from: http://www.r-inla.org/download
 require(lattice)
