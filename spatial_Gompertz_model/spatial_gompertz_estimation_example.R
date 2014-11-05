@@ -1,4 +1,8 @@
 
+#########################
+# Spatial Gompertz model
+# SEE: James T. Thorson, Hans Skaug, Kasper Kristensen, Andrew O. Shelton, Eric J. Ward, John Harms, Jim Benante. In press. The importance of spatial models for estimating the strength of density dependence. Ecology.
+#########################
 
 # load libraries
 library(INLA)
