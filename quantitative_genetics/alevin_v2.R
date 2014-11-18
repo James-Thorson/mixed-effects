@@ -168,8 +168,8 @@ p1<-p1+geom_violin(scale="width")+ theme(legend.position="none", plot.margin = u
 p2 <- ggplot(subset(post.all, variable=="Degree.days"), aes(variable, value, fill=model))
 p2<-p2+geom_violin(scale="area")+ theme(legend.position="none", plot.margin = unit(c(.1,.1,.1,.1), "cm"))+  scale_y_continuous(trans='reverse')+ylab(NULL)+xlab(NULL)+ scale_fill_manual(values=c("white", "darkgrey"))+ annotate("text", x = 0.7, y = 0.01, label = "(c)")
 
-p_save <- list( 'p1'=p1, 'p2'=p2, 'p3'=p3, 'post.all'=post.all, 'X1'=X1, 'X2'=X2)
-  save( p_save, "p_save.RData")
+p_save <- list( 'p1'=p1, 'p2'=p2, 'p3'=p3, 'post.all'=post.all, 'A'=A)
+  save( p_save, file="p_save.RData")
 
 ## display all the plots
 jpeg("Fig_5_Alevin_plots.jpg", height=8, width=7, units="in", res=600)
