@@ -154,7 +154,7 @@ A<-pedigree.summary$Amatrix[alevin.dat$Ind_id,alevin.dat$Ind_id]
 n<-100 ## number of individuals to plot
 ##white2red<-colorRampPalette(c("white","red"))
 
-p3<-ggplot(melt(A[1:n,1:n]), aes(x=X1, y=X2, fill=value)) + geom_tile(colour='lightgrey')+scale_fill_gradient(low="white", high="red")+ labs(x=NULL, y=NULL) +theme(legend.position="none", axis.text.x = element_blank(), axis.ticks=element_blank(),
+p3<-ggplot(melt(A[1:n,1:n]), aes(x=X1, y=X2, fill=value)) + geom_tile(colour='lightgrey')+scale_fill_gradient(low="white", high="black")+ labs(x=NULL, y=NULL) +theme(legend.position="none", axis.text.x = element_blank(), axis.ticks=element_blank(),
                     axis.text.y = element_blank(), plot.margin = unit(c(.3,2,.3,2), "cm"))+ annotate("text", x = 5, y = 96, label = "(a)")
 
 
@@ -162,19 +162,22 @@ p3<-ggplot(melt(A[1:n,1:n]), aes(x=X1, y=X2, fill=value)) + geom_tile(colour='li
 ## parameters
 ## cross
 p1 <- ggplot(subset(post.all, variable!="Degree.days"), aes(variable, value, fill=model))
-p1<-p1+geom_violin(scale="width")+ theme(legend.position="none", plot.margin = unit(c(.1,.1,.1,.1), "cm"), axis.text.x = element_text(angle=90, vjust=0.5))+xlab(NULL)+ylab("Coefficient value")+ scale_fill_manual(values=c("white", "skyblue"))+ annotate("text", x = 1, y = 7.5, label = "(b)")
+p1<-p1+geom_violin(scale="width")+ theme(legend.position="none", plot.margin = unit(c(.1,.1,.1,.1), "cm"), axis.text.x = element_text(angle=90, vjust=0.5))+xlab(NULL)+ylab("Coefficient value")+ scale_fill_manual(values=c("white", "darkgrey"))+ annotate("text", x = 1, y = 7.5, label = "(b)")
 
 ## degree days
 p2 <- ggplot(subset(post.all, variable=="Degree.days"), aes(variable, value, fill=model))
-p2<-p2+geom_violin(scale="area")+ theme(legend.position="none", plot.margin = unit(c(.1,.1,.1,.1), "cm"))+  scale_y_continuous(trans='reverse')+ylab(NULL)+xlab(NULL)+ scale_fill_manual(values=c("white", "skyblue"))+ annotate("text", x = 0.7, y = 0.01, label = "(c)")
+p2<-p2+geom_violin(scale="area")+ theme(legend.position="none", plot.margin = unit(c(.1,.1,.1,.1), "cm"))+  scale_y_continuous(trans='reverse')+ylab(NULL)+xlab(NULL)+ scale_fill_manual(values=c("white", "darkgrey"))+ annotate("text", x = 0.7, y = 0.01, label = "(c)")
+
+p_save <- list( 'p1'=p1, 'p2'=p2, 'p3'=p3, 'post.all'=post.all, 'X1'=X1, 'X2'=X2)
+  save( p_save, "p_save.RData")
 
 ## display all the plots
-png("../tex/figures/Alevin_plots.png", height=8, width=7, units="in", res=400)
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(3, 2, widths=c(0.80,0.20))))
-print(p3, vp = viewport(layout.pos.row = 1:2, layout.pos.col = 1:2))
-print(p1, vp = viewport(layout.pos.row = 3, layout.pos.col = 1, height=3))
-print(p2, vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
+jpeg("Fig_5_Alevin_plots.jpg", height=8, width=7, units="in", res=600)
+  grid.newpage()
+  pushViewport(viewport(layout = grid.layout(3, 2, widths=c(0.80,0.20))))
+  print(p3, vp = viewport(layout.pos.row = 1:2, layout.pos.col = 1:2))
+  print(p1, vp = viewport(layout.pos.row = 3, layout.pos.col = 1, height=3))
+  print(p2, vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
 dev.off()
 
 

@@ -115,7 +115,7 @@ Jags_0$BUGSoutput$summary
 L_hat_1 = apply( Jags_1$BUGSoutput$sims.list$L_hat, MARGIN=2:3, FUN=median )
 L_pred_1 = apply( Jags_1$BUGSoutput$sims.list$L_pred, MARGIN=2, FUN=quantile, prob=c(0.025,0.5,0.975) )
 L_pred_0 = apply( Jags_0$BUGSoutput$sims.list$L_pred, MARGIN=2, FUN=quantile, prob=c(0.025,0.5,0.975) )
-png(file=paste(File,"Growth.png",sep=""), width=4, height=4, res=400, units="in")
+jpeg(file=paste(File,"Fig_4_Growth.jpg",sep=""), width=4, height=4, res=600, units="in")
   par(mar=c(3,3,0.7,0)+0.1, mgp=c(2,0.5,0), tck=-0.02, xaxs="i", yaxs="i")
   # data
     matplot( y=Array[,'L_t',], x=Array[,'Date_after_start',], type="l", pch=20, lwd=0.5, col="black", lty="solid", xlab="", ylab="Length (mm)", ylim=c(0,max(Array[,'L_t',],na.rm=TRUE)) ) 
@@ -123,11 +123,11 @@ png(file=paste(File,"Growth.png",sep=""), width=4, height=4, res=400, units="in"
   # predictions of data
     #matplot( y=L_hat_1, x=Array[,'Date_after_start',], type="l", pch=20, col="red", lty="solid", add=TRUE ) 
   # Predictive distribution (variation)
-    lines( y=L_pred_1[2,], x=1:Data[['MaxDaysPred']], col="blue", lwd=3)
-    polygon( y=c(L_pred_1[1,],rev(L_pred_1[3,])), x=c(1:Data[['MaxDaysPred']],Data[['MaxDaysPred']]:1), col=rgb(0,0,1,0.2), border=NA)
+    lines( y=L_pred_1[2,], x=1:Data[['MaxDaysPred']], col="black", lwd=2, lty="dotted")
+    polygon( y=c(L_pred_1[1,],rev(L_pred_1[3,])), x=c(1:Data[['MaxDaysPred']],Data[['MaxDaysPred']]:1), col=rgb(0,0,0,0.2), border=NA, lty="dotted")
   # predictive distribution (conventional)
-    lines( y=L_pred_0[2,], x=1:Data[['MaxDaysPred']], col="red", lwd=3)
-    polygon( y=c(L_pred_0[1,],rev(L_pred_0[3,])), x=c(1:Data[['MaxDaysPred']],Data[['MaxDaysPred']]:1), col=rgb(1,0,0,0.2), border=NA)
+    lines( y=L_pred_0[2,], x=1:Data[['MaxDaysPred']], col="black", lwd=2, lty="dashed")
+    polygon( y=c(L_pred_0[1,],rev(L_pred_0[3,])), x=c(1:Data[['MaxDaysPred']],Data[['MaxDaysPred']]:1), col=rgb(0,0,0,0.4), border=NA, lty="dashed")
 dev.off()
 
 # Save record

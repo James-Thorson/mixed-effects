@@ -24,13 +24,13 @@ Lme = lmer( Y ~ 1|factor(Factor))
 
 library(TMB)
 
-compile( "Example1_linear_mixed_model.cpp" )
+compile( "linear_mixed_model.cpp" )
 
 Data = list( "n_data"=25, "n_factors"=5, "Factor"=Factor-1, "Y"=Y)
 Parameters = list( "X0"=-10, "log_SD0"=2, "log_SDZ"=2, "Z"=rep(0,Data$n_factor) )
-Random = c("Z", "X0")
+Random = c("Z","X0")
 
-dyn.load( dynlib("Example1_linear_mixed_model") )
+dyn.load( dynlib("linear_mixed_model") )
 Obj = MakeADFun(data=Data, parameters=Parameters, random=Random)
 
 # Prove that function and gradient calls work

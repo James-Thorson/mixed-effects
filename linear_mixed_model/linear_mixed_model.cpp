@@ -7,7 +7,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER( n_data );
   DATA_INTEGER( n_factors );
   DATA_FACTOR( Factor );
-  DATA_VECTOR( Y );
+  DATA_VECTOR( Y );                
   
   // Parameters
   PARAMETER( X0 );
