@@ -4,6 +4,8 @@
 # SEE: James T. Thorson, Hans Skaug, Kasper Kristensen, Andrew O. Shelton, Eric J. Ward, John Harms, Jim Benante. In press. The importance of spatial models for estimating the strength of density dependence. Ecology.
 #########################
 
+setwd( "C:/Users/James.Thorson/Desktop/Project_git/mixed-effects/spatial_Gompertz_model" )
+
 # load libraries
 library(INLA)
 library(TMB)
@@ -39,20 +41,24 @@ Species = 'Simulated_counts'
   Year = as.vector(col(Ymat))
   NAind = as.integer(ifelse(is.na(Y),1,0))
 
-  # Build SPDE object using INLA
-  if(MeshType=="Samples") mesh = inla.mesh.create( cbind(x_stations, y_stations), plot.delay=NULL, extend=list(n=8,offset=-0.15), refine=F )  # loc_samp
-  if(MeshType=="Refined") mesh = inla.mesh.create( cbind(x_stations, y_stations), plot.delay=NULL, extend=list(n=8,offset=-0.15), refine=list(min.angle=26) )  # loc_samp  ;  ,max.edge.data=0.08,max.edge.extra=0.2
+  # Build SPDE object using INLA (must pass mesh$idx$loc when supplying Boundary)
+  Cutoff = 1e-12 # 1e-1 
+  Boundary = NULL # inla.nonconvex.hull(points=cbind(x_stations, y_stations), convex=-0.1)	
+  if(MeshType=="Samples") mesh = inla.mesh.create( cbind(x_stations, y_stations), boundary=Boundary, plot.delay=NULL, cutoff=Cutoff, extend=list(n=8,offset=-0.15), refine=F )  # loc_samp
+  if(MeshType=="Refined") mesh = inla.mesh.create( cbind(x_stations, y_stations), boundary=Boundary, plot.delay=NULL, cutoff=Cutoff, extend=list(n=8,offset=-0.15), refine=list(min.angle=26) )  # loc_samp  ;  ,max.edge.data=0.08,max.edge.extra=0.2
   spde = inla.spde2.matern(mesh,alpha=2)
 
   # Settings
   newtonOption(smartsearch=TRUE)
 
   # Run spatial model
-  compile( "spatial_gompertz.cpp" )
-  dyn.load( dynlib("spatial_gompertz") )
-    Data = list(n_data=n_stations*n_years, Y=Y, NAind=NAind, n_stations=n_stations, meshidxloc=mesh$idx$loc-1, n_years=n_years, n_p=ncol(X), X=X, G0=spde$param.inla$M0, G1=spde$param.inla$M1, G2=spde$param.inla$M2)
-    Parameters = list(alpha=c(0.0), phi=0.0, log_tau_E=0.0, log_tau_O=0.0, log_kappa=0.0,	rho=0.5, Epsilon_input=matrix(rnorm(spde$n.spde*n_years),nrow=spde$n.spde,ncol=n_years), Omega_input=rnorm(spde$n.spde))
+  Data = list(n_data=n_stations*n_years, Y=Y, NAind=NAind, n_knots=mesh$n, n_stations=n_stations, meshidxloc=mesh$idx$loc-1, n_years=n_years, n_p=ncol(X), X=X, G0=spde$param.inla$M0, G1=spde$param.inla$M1, G2=spde$param.inla$M2)
+    Parameters = list(alpha=c(0.0), phi=0.0, log_tau_E=0.0, log_tau_O=0.0, log_kappa=0.0,	rho=0.5, Epsilon_input=matrix(rnorm(mesh$n*n_years),nrow=mesh$n,ncol=n_years), Omega_input=rnorm(mesh$n))
     Random = c("Epsilon_input","Omega_input")
+
+  # Make object
+  compile( "spatial_gompertz.cpp" )
+    dyn.load( dynlib("spatial_gompertz") )
     obj <- MakeADFun(data=Data, parameters=Parameters, random=Random, hessian=FALSE)
     obj$fn(obj$par)
 

@@ -9,6 +9,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(n_data);         // Total number of observations
   DATA_VECTOR(Y);       	// Count data
   DATA_FACTOR(NAind);		// 1 = Y is NA, 0 = is not NA
+  DATA_INTEGER(n_knots);
   DATA_INTEGER(n_stations)	// Number of stations 
   DATA_FACTOR(meshidxloc);	// Pointers into random effects vector x
   DATA_INTEGER(n_years)          // Number of years  
@@ -50,18 +51,19 @@ Type objective_function<Type>::operator() ()
   vector<Type> nu(n_data);
   vector<Type> mean_abundance(n_years);
   matrix<Type> log_Dji(n_stations,n_years);
-  matrix<Type> Epsilon(n_stations,n_years);
-  vector<Type> Omega(n_stations);
-  vector<Type> Equil(n_stations);
+  matrix<Type> Epsilon(n_knots,n_years);
+  vector<Type> Omega(n_knots);
+  vector<Type> Equil(n_knots);
  
   // Probability of Gaussian-Markov random fields (GMRFs)
   jnll += SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
   jnll += GMRF(Q)(Omega_input);
-
+  //jnll += SCALE(GMRF(Q),exp(-log_tau_E))(Omega_input);
+  
   // Transform GMRFs
   eta = X*alpha.matrix();
   int ii = 0;
-  for(int j=0; j<n_stations; j++){
+  for(int j=0; j<n_knots; j++){
     Omega(j) = Omega_input(j) / exp(log_tau_O);
     Equil(j) = eta(ii) + Omega(j) / (1-rho);
     ii++;

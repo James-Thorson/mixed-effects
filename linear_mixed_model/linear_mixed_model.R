@@ -28,7 +28,7 @@ compile( "linear_mixed_model.cpp" )
 
 Data = list( "n_data"=25, "n_factors"=5, "Factor"=Factor-1, "Y"=Y)
 Parameters = list( "X0"=-10, "log_SD0"=2, "log_SDZ"=2, "Z"=rep(0,Data$n_factor) )
-Random = c("Z","X0")
+Random = c("Z")
 
 dyn.load( dynlib("linear_mixed_model") )
 Obj = MakeADFun(data=Data, parameters=Parameters, random=Random)
@@ -50,10 +50,7 @@ Opt = nlminb( start=Obj$par, objective=Obj$fn, gradient=Obj$gr, control=list("tr
 c( fixef(Lme), Report$X0 )
 
 # Global mean
-cbind( ranef(Lme)[['factor(Factor)']], Report$Z )
-
-# Global mean
-cbind( ranef(Lme)[['factor(Factor)']], Report$Z )
+cbind( "True"=Z, ranef(Lme)[['factor(Factor)']], Report$Z )
 
 # Variances
 summary(Lme)
