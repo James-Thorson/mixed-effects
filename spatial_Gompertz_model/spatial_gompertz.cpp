@@ -36,6 +36,8 @@ Type objective_function<Type>::operator() ()
   // objective function -- joint negative log-likelihood 
   using namespace density;
   Type jnll = 0;
+  vector<Type> jnll_comp(3);
+  jnll_comp.setZero();
   
   // Spatial parameters
   Type kappa2 = exp(2.0*log_kappa);
@@ -56,8 +58,8 @@ Type objective_function<Type>::operator() ()
   vector<Type> Equil(n_knots);
  
   // Probability of Gaussian-Markov random fields (GMRFs)
-  jnll += SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
-  jnll += GMRF(Q)(Omega_input);
+  jnll_comp(0) += GMRF(Q)(Omega_input);
+  jnll_comp(1) = SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
   //jnll += SCALE(GMRF(Q),exp(-log_tau_E))(Omega_input);
   
   // Transform GMRFs
@@ -81,13 +83,17 @@ Type objective_function<Type>::operator() ()
       log_Dji(j,i) = nu[ii] + Epsilon(meshidxloc(j),i) / exp(log_tau_O) + ( eta(ii) + Omega(meshidxloc(j)) )/(1-rho);
       mean_abundance[i] = mean_abundance[i] + exp( log_Dji(j,i) );      
       if(!NAind(ii)){                
-        jnll -= dpois( Y[ii], exp( log_Dji(j,i) ), true );
+        jnll_comp(2) -= dpois( Y[ii], exp( log_Dji(j,i) ), true );
       }
       ii++;      
     }
     mean_abundance[i] = mean_abundance[i] / n_stations;      
   }
+  jnll = jnll_comp.sum();
 
+  // Diagnostics
+  REPORT( jnll_comp );
+  REPORT( jnll );
   // Spatial field summaries
   REPORT( Range );
   REPORT( SigmaE );
