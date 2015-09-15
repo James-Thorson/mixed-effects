@@ -23,6 +23,7 @@ if( Species=='Saved_example' ){
 }
 if( Species=='Simulated_example' ){
   # n_years=10; n_stations=100; SpatialScale=0.1; SD_O=0.5; SD_E=0.2; SD_extra=0; rho=0.8; logMeanDens=1; phi=NULL; Loc=NULL
+  set.seed( 1 )
   Sim_List = Sim_Gompertz_Fn( n_years=10, n_stations=100, SpatialScale=0.1, SD_O=0.4, SD_E=0.2, SD_extra=0, rho=0.5, logMeanDens=1, phi=0.0, Loc=NULL )
   Data = Sim_List[["DF"]]
 }
@@ -67,10 +68,10 @@ newtonOption(smartsearch=TRUE)
 # Parameter estimation
 ###################
 
-Version = c("spatial_gompertz", "spatial_gompertz_state_as_random", "spatial_gompertz_aniso")[1]
+Version = c("spatial_gompertz", "spatial_gompertz_state_as_random", "spatial_gompertz_aniso", "spatial_gompertz_parallel")[2]
 
 # Run spatial model
-if( Version=="spatial_gompertz"){
+if( Version %in% c("spatial_gompertz","spatial_gompertz_parallel") ){
   X = cbind( rep(1,n_data) )
   Data = list(n_data=n_stations*n_years, Y=Y, NAind=NAind, n_knots=mesh$n, n_stations=n_stations, meshidxloc=mesh$idx$loc-1, n_years=n_years, n_p=ncol(X), X=X, G0=spde$param.inla$M0, G1=spde$param.inla$M1, G2=spde$param.inla$M2)
   Parameters = list(alpha=c(0.0), phi=0.0, log_tau_E=0.0, log_tau_O=0.0, log_kappa=0.0,	rho=0.5, Epsilon_input=matrix(rnorm(mesh$n*n_years),nrow=mesh$n,ncol=n_years), Omega_input=rnorm(mesh$n))
@@ -79,7 +80,7 @@ if( Version=="spatial_gompertz"){
 if( Version=="spatial_gompertz_state_as_random"){
   X = cbind( rep(1,mesh$n*n_years) )
   Data = list(n_data=n_stations*n_years, Y=Y, NAind=NAind, n_knots=mesh$n, n_stations=n_stations, meshidxloc=mesh$idx$loc-1, n_years=n_years, n_p=ncol(X), X=X, G0=spde$param.inla$M0, G1=spde$param.inla$M1, G2=spde$param.inla$M2)
-  Parameters = list(alpha=c(0.0), phi=0.0, log_tau_U=0.0, log_tau_O=0.0, log_kappa=0.0,	rho=0.5, log_Dji=matrix(rnorm(mesh$n*n_years),nrow=mesh$n,ncol=n_years), Omega_input=rnorm(mesh$n))
+  Parameters = list(alpha=c(0.0), phi=0.0, log_tau_U=1.0, log_tau_O=1.0, log_kappa=0.0,	rho=0.5, log_Dji=matrix(rnorm(mesh$n*n_years),nrow=mesh$n,ncol=n_years), Omega_input=rnorm(mesh$n))
   Random = c("log_Dji","Omega_input")
 }
 
@@ -93,20 +94,29 @@ if( FALSE ){
 # Make object
 compile( paste0(Version,".cpp") )
 dyn.load( dynlib(Version) )
+start_time = Sys.time()
 obj <- MakeADFun(data=Data, parameters=Parameters, random=Random, map=Map, hessian=FALSE)
+  #obj$par <- opt0$par
 obj$fn(obj$par)
-Report = obj$report()
-#Report$jnll
-#Report$jnll_comp
-#ParHat = obj$env$parList()
+obj$gr(obj$par)
+#Report = obj$report()
 
 # Run optimizer
 obj$control <- list(trace=1,parscale=rep(1,13),REPORT=1,reltol=1e-12,maxit=100)
-opt = nlminb(obj$par, objective=obj$fn, gradient=obj$gr, lower=c(rep(-20,2),rep(-10,3),-0.999), upper=c(rep(20,2),rep(10,3),0.999), control=list(eval.max=1e4, iter.max=1e4))
+opt = nlminb(obj$par, objective=obj$fn, gradient=obj$gr, lower=c(rep(-20,2),rep(-10,3),-0.999), upper=c(rep(20,2),rep(10,3),0.999), control=list(eval.max=1e4, iter.max=1e4, trace=1))
 opt[["final_gradient"]] = obj$gr( opt$par )
+opt[["total_time"]] = Sys.time() - start_time
 unlist( Report[c('Range','SigmaO','SigmaE','SigmaU')] )
 Report = obj$report()
 
 # Get standard errors
 SD = try( sdreport(obj) )
+
+# Parallelized experimentations
+ben <- benchmark(obj,n=100,cores=1:3)
+plot(ben)
+
+# Parallel
+ben <- benchmark(obj,n=1,cores=1:2,expr=expression(do.call("nlminb",obj)))
+plot(ben)
 

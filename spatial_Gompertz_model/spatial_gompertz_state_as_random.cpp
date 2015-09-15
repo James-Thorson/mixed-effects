@@ -5,7 +5,7 @@
 template<class Type>
 Type objective_function<Type>::operator() ()
 {
-
+  
   DATA_INTEGER(n_data);         // Total number of observations
   DATA_VECTOR(Y);       	// Count data
   DATA_FACTOR(NAind);		// 1 = Y is NA, 0 = is not NA
@@ -60,7 +60,8 @@ Type objective_function<Type>::operator() ()
   eta = X*alpha.matrix();
   int ii = 0;
   for(int j=0; j<n_knots; j++){
-    Omega(j) = Omega_input(j) / exp(log_tau_O);
+    //Omega(j) = Omega_input(j) * exp(-log_tau_O);
+    Omega(j) = Omega_input(j);
     Equil(j) = ( eta(ii) + Omega(j) ) / (1-rho);
     ii++;
   }
@@ -75,12 +76,25 @@ Type objective_function<Type>::operator() ()
   }}
   
   // Probability of Gaussian-Markov random fields (GMRFs)
+  // Omega
+  // Default -- DOES WORK
+    //jnll_comp(0) = GMRF(Q)(Omega_input);
+  // SCALE function -- DOES WORK
+    // If doing it this way, Omega=Omega_input (i.e., Omega_input not rescaled prior to being used in the likelihood)
+    jnll_comp(0) = SCALE(GMRF(Q), exp(-log_tau_O))(Omega);    
+  // Simple rescaling -- DOES WORK
+    //jnll_comp(0) = GMRF(Q)( Omega * exp(log_tau_O));
+  // Experimental -- DOESN'T WORK!
+    //Eigen::SparseMatrix<Type> Qtmp = Q * exp(2*log_tau_O);
+    //jnll_comp(0) = GMRF(Qtmp)(Omega);
+  
+  // Epsilon
   //jnll += SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
-  jnll_comp(0) = GMRF(Q)(Omega_input);
   for(int i=0; i<n_years; i++){ 
+    // SCALE(f,b) calculates density g(y) = f(x), where f is a known density and y=x*b
     jnll_comp(1) += SCALE( GMRF(Q), exp(-log_tau_U) )(log_Dji.col(i)-log_Dji_hat.col(i));
+    //jnll_comp(1) += GMRF(Q)( (log_Dji.col(i)-log_Dji_hat.col(i)) * exp(-log_tau_U));       // DOESN'T WORK!
   }
-  //jnll += SCALE(GMRF(Q),exp(-log_tau_E))(Omega_input);
   
   // Likelihood contribution from observations
   mean_abundance.setZero();

@@ -40,7 +40,15 @@ Obj$gr( Obj$par )
 # Optimize
 Opt = nlminb( start=Obj$par, objective=Obj$fn, gradient=Obj$gr, control=list("trace"=1) )
   Report = Obj$report()
-  SD = sdreport( Obj )
+  SD = sdreport( Obj, bias.correct=TRUE )
+
+# Bias correct experiment
+SD$unbiased$value['SampleVarZ']
+Report$SampleVarZ  
+SD$unbiased$value['SampleSDZ']
+Report$SampleSDZ
+SD$unbiased$value['SDZ']
+Report$SDZ  
 
 ######################
 # Compare estimates

@@ -16,6 +16,8 @@ Type objective_function<Type>::operator() ()
   // 
   int nobs = y_t.size();
   vector<Type> xpred_t(nobs);
+  vector<Type> x_t(nobs);
+  x_t = exp( log_x_t );
   
   // Objective funcction
   Type jnll = 0;
@@ -34,6 +36,7 @@ Type objective_function<Type>::operator() ()
   // Reporting
   ADREPORT( log_x_t );
   REPORT( log_x_t );
+  ADREPORT( x_t );
 
   return jnll;
 }

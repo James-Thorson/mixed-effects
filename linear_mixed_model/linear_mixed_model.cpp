@@ -31,7 +31,6 @@ Type objective_function<Type>::operator() ()
   // Reporting
   Type SDZ = exp(log_SDZ);
   Type SD0 = exp(log_SD0);
-  
   ADREPORT( SDZ );
   REPORT( SDZ );
   ADREPORT( SD0 );
@@ -40,6 +39,16 @@ Type objective_function<Type>::operator() ()
   REPORT( Z );
   ADREPORT( X0 );
   REPORT( X0 );
+  
+  // bias-correction testing
+  Type MeanZ = Z.sum() / Z.size();
+  Type SampleVarZ = ( (Z-MeanZ) * (Z-MeanZ) ).sum();
+  Type SampleSDZ = pow( SampleVarZ + 1e-20, 0.5);
+  REPORT( SampleVarZ );
+  REPORT( SampleSDZ );  
+  ADREPORT( SampleVarZ );
+  ADREPORT( SampleSDZ );  
+  
 
   return jnll;
 }

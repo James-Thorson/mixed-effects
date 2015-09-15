@@ -31,6 +31,7 @@ Type objective_function<Type>::operator() ()
 
   // Random effects
   PARAMETER_ARRAY(Epsilon_input);  // Spatial process variation
+  //PARAMETER_MATRIX(Epsilon_input);  // Spatial process variation
   PARAMETER_VECTOR(Omega_input);   // Spatial variation in carrying capacity
 
   // objective function -- joint negative log-likelihood 
@@ -61,6 +62,10 @@ Type objective_function<Type>::operator() ()
   jnll_comp(0) += GMRF(Q)(Omega_input);
   jnll_comp(1) = SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
   //jnll += SCALE(GMRF(Q),exp(-log_tau_E))(Omega_input);
+  //for(int t=0; t<n_years; t++){ 
+  //  if(t==0) jnll_comp(1) += GMRF(Q)(Epsilon_input.col(t));
+  //  if(t>=1) jnll_comp(1) += GMRF(Q)(Epsilon_input.col(t)-rho*Epsilon_input.col(t-1));
+  //}
   
   // Transform GMRFs
   eta = X*alpha.matrix();
