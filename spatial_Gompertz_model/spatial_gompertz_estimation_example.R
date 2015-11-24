@@ -112,6 +112,10 @@ unlist( Report[c('Range','SigmaO','SigmaE','SigmaU')] )
 # Get standard errors
 SD = try( sdreport(obj) )
 
+#########################
+# Experiment with parallelization
+#########################
+
 # Parallelized experimentations
 ben <- benchmark(obj,n=100,cores=1:3)
 plot(ben)
