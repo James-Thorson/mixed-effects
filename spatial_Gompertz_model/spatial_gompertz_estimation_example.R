@@ -62,13 +62,13 @@ if(MeshType=="Refined") mesh = inla.mesh.create( cbind(x_stations, y_stations), 
 spde = inla.spde2.matern(mesh,alpha=2)
 
 # Settings
-newtonOption(smartsearch=TRUE)
+#newtonOption(smartsearch=TRUE)
 
 ###################
 # Parameter estimation
 ###################
 
-Version = c("spatial_gompertz", "spatial_gompertz_state_as_random", "spatial_gompertz_aniso", "spatial_gompertz_parallel")[2]
+Version = c("spatial_gompertz", "spatial_gompertz_state_as_random", "spatial_gompertz_aniso", "spatial_gompertz_parallel")[4]
 
 # Run spatial model
 if( Version %in% c("spatial_gompertz","spatial_gompertz_parallel") ){
@@ -106,8 +106,8 @@ obj$control <- list(trace=1,parscale=rep(1,13),REPORT=1,reltol=1e-12,maxit=100)
 opt = nlminb(obj$par, objective=obj$fn, gradient=obj$gr, lower=c(rep(-20,2),rep(-10,3),-0.999), upper=c(rep(20,2),rep(10,3),0.999), control=list(eval.max=1e4, iter.max=1e4, trace=1))
 opt[["final_gradient"]] = obj$gr( opt$par )
 opt[["total_time"]] = Sys.time() - start_time
-unlist( Report[c('Range','SigmaO','SigmaE','SigmaU')] )
 Report = obj$report()
+unlist( Report[c('Range','SigmaO','SigmaE','SigmaU')] )
 
 # Get standard errors
 SD = try( sdreport(obj) )
