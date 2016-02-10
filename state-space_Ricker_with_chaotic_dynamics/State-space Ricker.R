@@ -30,9 +30,13 @@ compile( paste0(Version_innovations,".cpp") )
 Data = list("y_t"=n)
 Params = list("log_r"=log(1), "log_k"=log(1), "log_sigmap"=log(1), "log_sigmam"=log(1), "e_t"=rnorm(length(n)) )
 dyn.load( dynlib(Version_innovations) )
-Obj_0 = MakeADFun( data=Data, parameters=Params, random="e_t")
+Obj_0 = MakeADFun( data=Data, parameters=Params, random="e_t", DLL=Version_innovations)
 Opt_0 = nlminb(start=Obj_0$par, objective=Obj_0$fn, gradient=Obj_0$gr, control=list("trace"=1))
 Opt_0[["final_gradient"]] = Obj_0$gr( Opt_0$par )
+
+# Check hessian
+Obj_0$env$spHess(random=TRUE)
+mean( as.matrix(Obj_0$env$spHess(random=TRUE))==0 )
 
 #################
 # State-space parameterization
@@ -44,9 +48,15 @@ compile( paste0(Version_statespace,".cpp") )
 Data = list("y_t"=n)
 Params = list("log_r"=log(1), "log_k"=log(1), "log_sigmap"=log(1), "log_sigmam"=log(1), "log_x_t"=rnorm(length(n)) )
 dyn.load( dynlib(Version_statespace) )
-Obj_1 = MakeADFun( data=Data, parameters=Params, random="log_x_t")
+Obj_1 = MakeADFun( data=Data, parameters=Params, random="log_x_t", DLL=Version_statespace)
 Opt_1 = nlminb(start=Obj_1$par, objective=Obj_1$fn, gradient=Obj_1$gr, control=list("trace"=1))
 Opt_1[["final_gradient"]] = Obj_1$gr( Opt_1$par )
+
+# Check hessian
+Obj_1$env$spHess(random=TRUE)
+mean( as.matrix(Obj_1$env$spHess(random=TRUE))==0 )
+
+
 
 # Check epsilon bias-correct method
 SD_a = sdreport( Obj_1, bias.correct=FALSE )
