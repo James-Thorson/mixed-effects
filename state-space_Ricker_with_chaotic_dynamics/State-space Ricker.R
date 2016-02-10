@@ -1,5 +1,5 @@
 
-setwd( "C:/Users/James.Thorson/Desktop/Project_git/mixed-effects/state-space Ricker with chaotic dynamics/" )
+setwd( "C:/Users/James.Thorson/Desktop/Project_git/mixed-effects/state-space_Ricker_with_chaotic_dynamics/" )
 library( TMB )
 
 # Parameters
